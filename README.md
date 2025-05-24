@@ -14,6 +14,10 @@ This bootstrap provides a server-rendered interface using Bootstrap 5 and prepar
 1. Clone this repository.
 2. Install dependencies with `poetry install`.
 3. Optional: create an admin user with `poetry run python manage.py createsuperuser`.
+   On first run the project automatically creates a default administrator with
+   username `admin` and password `admin`. When logging in with these defaults you
+   will be required to change the password unless the environment variable
+   `CIELO_DEPLOYMENT` is set to `development` or `dev`.
 
 ## Running the Demo
 
