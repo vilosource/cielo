@@ -22,4 +22,4 @@ class CieloPasswordChangeView(PasswordChangeView):
     template_name = 'users/change_password.html'
 
     def get_success_url(self):
-        return reverse('login')
+        return reverse('users:login')
