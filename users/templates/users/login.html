@@ -1,20 +1,46 @@
-{% extends 'common/base_material.html' %}
+{% extends 'common/base_auth.html' %}
 {% load static %}
 
 {% block title %}Login{% endblock %}
 
-{% block page_title %}Login{% endblock %}
-
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-4">
-    <h1 class="text-center text-primary">CIELO</h1>
-    <p class="text-center">Cloud Infrastructure, Environment, and Lifecycle Orchestrator</p>
-    <form method="post" class="card p-4">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-primary w-100">Login</button>
-    </form>
+<div class="account-pages mt-5 mb-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6 col-xl-4">
+        <div class="card">
+          <div class="card-body p-4">
+            <div class="text-center w-75 m-auto">
+              <div class="auth-logo">
+                <a href="{% url 'users:login' %}" class="logo logo-dark text-center">
+                  <span class="logo-lg">
+                    <img src="{% static 'material_theme/images/logo-dark.png' %}" alt="" height="22">
+                  </span>
+                </a>
+                <a href="{% url 'users:login' %}" class="logo logo-light text-center">
+                  <span class="logo-lg">
+                    <img src="{% static 'material_theme/images/logo-light.png' %}" alt="" height="22">
+                  </span>
+                </a>
+              </div>
+              <p class="text-muted mb-4 mt-3">Enter your username and password to access CIELO.</p>
+            </div>
+            <form method="post">
+              {% csrf_token %}
+              {{ form.as_p }}
+              <div class="d-grid mb-0 text-center">
+                <button class="btn btn-primary" type="submit">Log In</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12 text-center">
+            <p class="text-muted">Need help? Contact your administrator.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
