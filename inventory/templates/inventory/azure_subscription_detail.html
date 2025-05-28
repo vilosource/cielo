@@ -1,0 +1,19 @@
+{% extends 'common/base_material.html' %}
+{% load static %}
+
+{% block title %}Subscription: {{ subscription.name }}{% endblock %}
+
+{% block page_title %}Subscription Details{% endblock %}
+
+{% block breadcrumb %}
+<ul class="breadcrumb">
+  <li class="breadcrumb-item"><a href="javascript: void(0);">Inventory</a></li>
+  <li class="breadcrumb-item active">{{ subscription.name }}</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<h1>Azure Subscription: {{ subscription.name }}</h1>
+<p>Subscription ID: {{ subscription.subscription_id }}</p>
+<p class="mt-4"><em>(This is a placeholder page for subscription details. More content will be added here.)</em></p>
+{% endblock %}

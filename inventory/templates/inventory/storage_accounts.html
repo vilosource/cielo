@@ -1,7 +1,18 @@
-{% extends 'common/base.html' %}
+{% extends 'common/base_material.html' %}
+{% load static %}
+
 {% block title %}Storage Accounts{% endblock %}
+
+{% block page_title %}Storage Accounts List{% endblock %}
+
+{% block breadcrumb %}
+<ul class="breadcrumb">
+  <li class="breadcrumb-item"><a href="javascript: void(0);">Inventory</a></li>
+  <li class="breadcrumb-item active">Storage Accounts</li>
+</ul>
+{% endblock %}
+
 {% block content %}
-<h1>Storage Accounts</h1>
 <table class="table table-striped">
   <thead>
     <tr>

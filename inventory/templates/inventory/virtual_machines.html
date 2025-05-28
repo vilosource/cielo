@@ -1,35 +1,107 @@
-{% extends 'common/base.html' %}
+{% extends 'common/base_material.html' %}
+{% load static %}
+
 {% block title %}Virtual Machines{% endblock %}
+
+{% block page_title %}Virtual Machines List{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Virtual Machines</li>
+{% endblock %}
+
 {% block content %}
-<h1>Virtual Machines</h1>
-<div class="row mb-3">
-  <div class="col">
-    <div class="card text-bg-primary">
+<div class="row">
+  <div class="col-xl-3 col-md-6">
+    <div class="card">
       <div class="card-body">
-        <h5 class="card-title">Total VMs</h5>
-        <p class="card-text">{{ vms|length }}</p>
+          <div class="dropdown float-end">
+              <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="mdi mdi-dots-vertical"></i>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end">
+                  <a href="javascript:void(0);" class="dropdown-item">Refresh</a>
+              </div>
+          </div>
+          <h4 class="header-title mt-0 mb-4">Total VMs</h4>
+          <div class="widget-chart-1">
+              <div class="widget-chart-box-1 float-start" dir="ltr">
+                  {# Placeholder for a chart or icon if you want #}
+                   <i class="fe-server" style="font-size: 40px;"></i>
+              </div>
+              <div class="widget-detail-1 text-end">
+                  <h2 class="fw-normal pt-2 mb-1"> {{ page_obj.paginator.count }} </h2>
+                  <p class="text-muted mb-1">Registered VMs</p>
+              </div>
+          </div>
       </div>
-    </div>
+    </div> <!-- end card -->
   </div>
-</div>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Location</th>
-      <th>Environment</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for vm in vms %}
-    <tr>
-      <td>{{ vm.name }}</td>
-      <td>{{ vm.location }}</td>
-      <td>{{ vm.environment }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="3" class="text-center">No virtual machines</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+</div><!-- end row -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title">Virtual Machine Listing</h4>
+                <p class="text-muted font-13 mb-4">
+                    List of all virtual machines in the inventory.
+                </p>
+
+                <table id="basic-datatable" class="table dt-responsive nowrap w-100">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Subscription</th>
+                            <th>Location</th>
+                            <th>Environment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vm in page_obj.object_list %}
+                        <tr>
+                            <td>{{ vm.name }}</td>
+                            <td>{{ vm.subscription.name|default:"N/A" }}</td>
+                            <td>{{ vm.location }}</td>
+                            <td>{{ vm.environment }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">No virtual machines found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="VMs navigation" class="mt-4">
+                  <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                      <li class="page-item"><a class="page-link" href="?page=1">&laquo;&laquo; First</a></li>
+                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Previous</a></li>
+                    {% endif %}
+                
+                    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                
+                    {% if page_obj.has_next %}
+                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next &raquo;</a></li>
+                      <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;&raquo;</a></li>
+                    {% endif %}
+                  </ul>
+                </nav>
+                {% endif %}
+            </div> <!-- end card body-->
+        </div> <!-- end card -->
+    </div><!-- end col-->
+</div><!-- end row-->
+{% endblock %}
+
+{% block extra_js %}
+{# If you use datatables from the theme, you might need to include its JS and initialize it #}
+{# Example:
+<script src="{% static 'material_theme/libs/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'material_theme/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('#basic-datatable').DataTable();
+    });
+</script>
+#}
 {% endblock %}

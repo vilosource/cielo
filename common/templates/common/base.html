@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CIELO - {% block title %}{% endblock %}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
     :root {
       --cielo-primary: #0076C0;
       --cielo-accent: #F5A623;
       --cielo-gray: #4A4A4A;
     }
-    body { color: var(--cielo-gray); }
-    .sidebar { width: 200px; }
+    body { color: var(--cielo-gray); } /* Existing style */
+    .sidebar { width: 250px; } /* Increased width for longer menu items */
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -20,8 +21,38 @@
   <nav class="sidebar bg-light vh-100 p-3">
     <h3 class="text-primary">CIELO</h3>
     <ul class="nav flex-column">
-      <li class="nav-item"><a class="nav-link" href="{% url 'inventory:virtual_machines' %}">Virtual Machines</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'inventory:storage_accounts' %}">Storage Accounts</a></li>
+      {% for item in cielo_navigation_items %}
+        {% if item.sub_items %}
+          <li class="nav-item">
+            <a class="nav-link d-flex justify-content-between align-items-center" href="#submenu-{{ forloop.counter }}" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="submenu-{{ forloop.counter }}">
+              <span>
+                {% if item.icon_class %}<i class="{{ item.icon_class }} me-2"></i>{% endif %}
+                {{ item.label }}
+              </span>
+              <i class="bi bi-chevron-down"></i>
+            </a>
+            <div class="collapse ps-3" id="submenu-{{ forloop.counter }}">
+              <ul class="nav flex-column">
+                {% for sub_item in item.sub_items %}
+                  <li class="nav-item">
+                    <a class="nav-link {% if request.path == sub_item.url %}active fw-bold{% endif %}" href="{{ sub_item.url }}">
+                      {% if sub_item.icon_class %}<i class="{{ sub_item.icon_class }} me-2"></i>{% endif %}
+                      {{ sub_item.label }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.view_name in item.active_pattern_names %}active fw-bold{% else %}{% endif %}" href="{{ item.url }}">
+              {% if item.icon_class %}<i class="{{ item.icon_class }} me-2"></i>{% endif %}
+              {{ item.label }}
+            </a>
+          </li>
+        {% endif %}
+      {% endfor %}
     </ul>
   </nav>
   <div class="flex-grow-1">

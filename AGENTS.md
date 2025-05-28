@@ -1,124 +1,253 @@
-reate a modular Django project named cielo using Poetry for dependency management.
+# CIELO Developer Guide
 
-This project is called CIELO – Cloud Infrastructure, Environment, and Lifecycle Orchestrator.
-It is a multi-app Django project that will be rendered server-side using Bootstrap 5 and prepared for future REST API and React frontend integration.
+## Project Overview
 
-The current directory is empty. Start from scratch and set up the project with best practices.
+CIELO (Cloud Infrastructure, Environment, and Lifecycle Orchestrator) is a modular Django platform designed to manage and orchestrate cloud resources across multiple providers. The project follows a pluggable architecture where core services are separated from specialized functionality through independent "CIELO Apps."
 
-📦 Project Structure
-swift
-Copy
-Edit
-cielo/
-├── pyproject.toml                     ← Poetry-managed project
-├── manage.py
-├── cielo_core/                        ← Main Django project (settings, URLs)
-│   ├── settings.py
-│   ├── urls.py
-│   └── ...
-├── common/                            ← Shared templates, static files
-│   ├── templates/common/base.html
-│   └── static/
-│       ├── css/
-│       ├── js/
-│       └── logo/
-├── inventory/                         ← App for virtual machines and storage accounts
-│   └── templates/inventory/
-│       ├── virtual_machines.html
-│       └── storage_accounts.html
-├── users/                             ← App for authentication
-│   └── templates/users/login.html
-⚙️ Setup Requirements
-Use Poetry to manage dependencies
+### Key Features Summary
 
-Install Django
+- **Cloud-Agnostic Core Platform**: Provides authentication, authorization, session management, and UI shell
+- **Pluggable Application Architecture**: Specialized functionalities implemented as independent Django apps
+- **Dynamic App Integration**: Apps declare their integration points (permissions, navigation) to the core
+- **Responsive Material Design UI**: Built with Bootstrap 5 and a professional admin theme
+- **Server-Side Rendering**: Django templates with modern, responsive layouts
 
-Initialize Django project as cielo_core
+## Project Architecture
 
-Create Django apps:
+### Core Components
 
-common: layout, base templates, shared static files
+- **`cielo_core/`**: Main Django project with settings, URLs, and WSGI configuration
+- **`common/`**: Shared utilities, base templates, static assets, and context processors
+- **`inventory/`**: Example CIELO app demonstrating cloud resource management
+- **`users/`**: Authentication and user management
+- **`material/`**: Design reference templates from the Minton admin theme
 
-inventory: for infrastructure inventory views
+### CIELO App Integration System
 
-users: for authentication (login/logout/profile)
+CIELO apps integrate with the core through a standardized hook system:
 
-Add apps to INSTALLED_APPS
+1. **App Configuration**: Apps declare integration points in their `apps.py`:
+   ```python
+   class InventoryConfig(AppConfig):
+       cielo_app_label = _("Inventory")
+       cielo_icon_class = "bi-archive"
+       cielo_navigation_provider = "inventory.cielo_hooks.get_navigation_items"
+       cielo_permissions_provider = "inventory.cielo_hooks.get_app_permissions"
+   ```
 
-Use Django’s built-in LoginView and LogoutView
+2. **Navigation Providers**: Apps provide navigation items through hook functions:
+   ```python
+   def get_navigation_items(request):
+       items = []
+       if request.user.has_perm('inventory.view_virtualmachine'):
+           items.append({
+               'label': _('Virtual Machines'),
+               'url': reverse('inventory:virtual_machines'),
+               'icon_class': 'bi-hdd-stack',
+               'active_pattern_names': ['inventory:virtual_machines'],
+           })
+       return items
+   ```
 
-🎨 UI and Theming
-Use Bootstrap 5 (via CDN or static include)
+3. **Context Processor**: The `cielo_navigation_context` processor aggregates navigation from all apps and makes it available in templates.
 
-Use this color palette:
+## Template System and UI Framework
 
-Primary blue: #0076C0
+### Base Template: `base_material.html`
 
-Accent orange: #F5A623
+The core UI is built around `common/templates/common/base_material.html`, which provides:
 
-Neutral gray: #4A4A4A
+- **Responsive Layout**: Fixed left sidebar, top navigation, main content area
+- **Theme Integration**: Professional admin theme with light/dark mode support
+- **Dynamic Navigation**: Automatically populated from registered CIELO apps
+- **User Authentication UI**: Login status, user dropdown, permissions-based content
+- **Extensible Blocks**: Multiple template blocks for customization
 
-Support client-side light/dark theme toggle
+#### Key Template Blocks
 
-Ensure all templates are responsive and use semantic HTML5
+```html
+{% block title %}{% endblock %}           <!-- Browser title -->
+{% block page_title %}{% endblock %}     <!-- Main page heading -->
+{% block breadcrumb %}{% endblock %}     <!-- Breadcrumb navigation -->
+{% block content %}{% endblock %}        <!-- Main content area -->
+{% block extra_head %}{% endblock %}     <!-- Additional CSS/meta tags -->
+{% block extra_js %}{% endblock %}       <!-- Additional JavaScript -->
+```
 
-🧩 Templates to Implement
-common/templates/common/base.html
+#### Navigation System
 
-Fixed left sidebar:
+The base template includes a dynamic sidebar that automatically displays navigation items from all registered CIELO apps:
 
-Links: “Virtual Machines”, “Storage Accounts”
+```html
+<div id="sidebar-menu">
+    <ul id="side-menu">
+        <li class="menu-title">CIELO Navigation</li>
+        {% for item in cielo_navigation_items %}
+            {% if item.sub_items %}
+                <!-- Expandable menu with sub-items -->
+            {% else %}
+                <!-- Single navigation item -->
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+```
 
-Top navbar:
+### Using Material Design References
 
-Project name: CIELO
+The `material/` directory contains comprehensive HTML templates from the Minton admin theme. These serve as design references and component libraries for building CIELO pages.
 
-Tagline: Cloud Infrastructure, Environment, and Lifecycle Orchestrator
+#### How to Use Material Templates
 
-Light/dark theme toggle
+1. **Browse Available Designs**: The `material/` directory contains over 100 pre-built pages:
+   - `dashboard-*.html`: Various dashboard layouts
+   - `tables-*.html`: Different table styles and interactions
+   - `forms-*.html`: Form layouts and components
+   - `ui-*.html`: UI components (buttons, cards, modals, etc.)
+   - `charts-*.html`: Chart and visualization examples
 
-User profile dropdown (shows username, “Settings”, “Logout”)
+2. **Extract Components**: Copy relevant HTML sections from material templates:
+   ```html
+   <!-- From material/tables-basic.html -->
+   <div class="card">
+       <div class="card-body">
+           <h4 class="header-title">Your Table Title</h4>
+           <table class="table table-striped">
+               <!-- Table content -->
+           </table>
+       </div>
+   </div>
+   ```
 
-Uses {% block content %} for inner pages
+3. **Adapt for Django**: Convert to Django template syntax:
+   ```html
+   <!-- In your CIELO app template -->
+   {% extends 'common/base_material.html' %}
+   
+   {% block content %}
+   <div class="card">
+       <div class="card-body">
+           <h4 class="header-title">{{ page_title }}</h4>
+           <table class="table table-striped">
+               {% for item in object_list %}
+                   <tr>
+                       <td>{{ item.name }}</td>
+                   </tr>
+               {% endfor %}
+           </table>
+       </div>
+   </div>
+   {% endblock %}
+   ```
 
-inventory/templates/inventory/virtual_machines.html
+#### Static Assets
 
-Heading: Virtual Machines
+The material theme assets are integrated into Django's static file system:
+- **Location**: `common/static/material_theme/`
+- **Usage**: Reference via `{% static 'material_theme/css/app.min.css' %}`
+- **Components**: CSS, JavaScript, images, fonts, and icons
 
-Summary cards (e.g., total VMs)
+## Development Best Practices
 
-Bootstrap table: Name, Location, Environment
+### Creating a New CIELO App
 
-inventory/templates/inventory/storage_accounts.html
+1. **Generate Django App**:
+   ```bash
+   python manage.py startapp your_app_name
+   ```
 
-Heading: Storage Accounts
+2. **Configure App Integration** in `apps.py`:
+   ```python
+   class YourAppConfig(AppConfig):
+       name = 'your_app_name'
+       cielo_app_label = _("Your App")
+       cielo_icon_class = "bi-your-icon"
+       cielo_navigation_provider = "your_app_name.cielo_hooks.get_navigation_items"
+   ```
 
-Table: Name, Location, SKU, Access Tier
+3. **Create Hook Functions** in `cielo_hooks.py`:
+   ```python
+   def get_navigation_items(request):
+       return [{
+           'label': _('Your Feature'),
+           'url': reverse('your_app_name:your_view'),
+           'icon_class': 'bi-your-icon',
+       }]
+   ```
 
-users/templates/users/login.html
+4. **Register in Settings**:
+   ```python
+   INSTALLED_APPS = [
+       # ... other apps
+       'your_app_name',
+   ]
+   ```
 
-Clean login form with Bootstrap styling
+### Template Development
 
-Centered form with CIELO name and tagline
+1. **Extend Base Template**:
+   ```html
+   {% extends 'common/base_material.html' %}
+   ```
 
-POSTs to Django's login view
+2. **Use Material Components**: Reference `material/` templates for styling patterns
 
-🔐 Auth & Access
-Use Django’s LoginView and LogoutView
+3. **Implement Required Blocks**:
+   ```html
+   {% block title %}Your Page Title{% endblock %}
+   {% block page_title %}Your Page Title{% endblock %}
+   {% block content %}
+       <!-- Your page content -->
+   {% endblock %}
+   ```
 
-Add URLs for /login/ and /logout/
+### Navigation and Permissions
 
-Protect inventory views with @login_required
+- Use Django's permission system for access control
+- Navigation items automatically respect user permissions
+- Test with different user roles to ensure proper access restrictions
 
-Show user menu in navbar only if user.is_authenticated
+### Static File Management
 
-🌱 Extensibility
-Layout and template structure should allow future:
+- Place app-specific static files in `your_app/static/your_app/`
+- Use `{% static %}` template tag for all asset references
+- Run `python manage.py collectstatic` for production deployments
 
-REST API integration
+## Getting Started
 
-React frontend using the same API
+1. **Install Dependencies**:
+   ```bash
+   poetry install
+   ```
 
-Markdown wiki
+2. **Run Migrations**:
+   ```bash
+   python manage.py migrate
+   ```
 
-Dashboard charts via Chart.js
+3. **Create Superuser**:
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+4. **Start Development Server**:
+   ```bash
+   python manage.py runserver
+   ```
+
+5. **Access Application**: Navigate to `http://localhost:8000`
+
+## Available Material Components
+
+The `material/` directory provides extensive examples for:
+
+- **Dashboards**: Analytics, CRM layouts
+- **Tables**: Basic, DataTables, responsive, editable
+- **Forms**: Basic, advanced, validation, file uploads
+- **Charts**: Apex, Chart.js, Morris, and more
+- **UI Components**: Cards, buttons, modals, tooltips
+- **Authentication**: Login, register, password recovery
+- **E-commerce**: Products, orders, customers
+- **Communication**: Email, chat, calendar
+
+Use these as references to build consistent, professional interfaces for your CIELO applications.
