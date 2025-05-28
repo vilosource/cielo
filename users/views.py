@@ -1,4 +1,4 @@
-from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.urls import reverse
 import os
 
@@ -23,3 +23,11 @@ class CieloPasswordChangeView(PasswordChangeView):
 
     def get_success_url(self):
         return reverse('users:login')
+
+
+class CieloLogoutView(LogoutView):
+    template_name = 'users/logout.html'
+
+    def get_next_page(self):
+        """Override to render template instead of redirecting."""
+        return None
